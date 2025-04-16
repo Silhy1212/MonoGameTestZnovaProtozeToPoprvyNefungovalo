@@ -15,7 +15,6 @@ public class Game1 : Game
    
     private List<(Vector2 position, Rectangle sourceRect)> tiles = new();
 
-
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -33,18 +32,22 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         playerSheet = Content.Load<Texture2D>("spritesheet");
 
-        player = new Player(new Vector2(0, 0));
+        player = new Player(new Vector2(100, 0));
+
+        // Add platform tiles
         int tilePositionX = 100;
+        tiles.Add((new Vector2(tilePositionX, 380), SpriteSheet.PlatformTopLeft));
+        tilePositionX += 8 * 4;
+        tiles.Add((new Vector2(tilePositionX, 380), SpriteSheet.PlatformTopMid));
+        tilePositionX += 8 * 4;
+        tiles.Add((new Vector2(tilePositionX, 380), SpriteSheet.PlatformTopRight));
+        
+         tilePositionX = 200;
         tiles.Add((new Vector2(tilePositionX, 300), SpriteSheet.PlatformTopLeft));
         tilePositionX += 8 * 4;
         tiles.Add((new Vector2(tilePositionX, 300), SpriteSheet.PlatformTopMid));
         tilePositionX += 8 * 4;
-
         tiles.Add((new Vector2(tilePositionX, 300), SpriteSheet.PlatformTopRight));
-
-
-        // Platformy
-        
     }
 
     protected override void Update(GameTime gameTime)
@@ -55,7 +58,7 @@ public class Game1 : Game
         int windowWidth = GraphicsDevice.Viewport.Width;
         int windowHeight = GraphicsDevice.Viewport.Height;
 
-        player.Update(gameTime, windowWidth, windowHeight);
+        player.Update(gameTime, windowWidth, windowHeight, tiles);
 
         base.Update(gameTime);
     }
@@ -68,11 +71,11 @@ public class Game1 : Game
 
         player.Draw(_spriteBatch, playerSheet);
 
+        // Draw the platforms (tiles)
         foreach (var tile in tiles)
         {
             _spriteBatch.Draw(playerSheet, tile.position, tile.sourceRect, Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
         }
-
 
         _spriteBatch.End();
 
