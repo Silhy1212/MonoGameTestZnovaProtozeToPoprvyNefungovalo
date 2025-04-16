@@ -10,6 +10,8 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     Texture2D playerSheet;
     Vector2 playerPosition = new Vector2(0, 0);
+    private static int playerScale = 4;
+    public static int playerHeight = 8 * playerScale;
     Rectangle sourceRect = new Rectangle(0, 0, 8, 8); 
 
     public Game1()
@@ -41,7 +43,13 @@ public class Game1 : Game
             Exit();
 
         // TODO: Add your update logic here
+        int windowHeight = GraphicsDevice.Viewport.Height;
         float velocity = 0.5f;
+        if (playerPosition.Y  >= windowHeight - playerHeight )
+        {
+            playerPosition.Y = windowHeight - playerHeight; // Zastavíme hráče na spodní hranici okna
+            velocity = 0f; // Zastavíme vertikální pohyb (gravitace)
+        }
         playerPosition.Y += velocity * gameTime.ElapsedGameTime.Milliseconds;
         base.Update(gameTime);
         
@@ -52,7 +60,7 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        _spriteBatch.Draw(playerSheet, playerPosition, sourceRect, Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
+        _spriteBatch.Draw(playerSheet, playerPosition, sourceRect, Color.White, 0f, Vector2.Zero, playerScale, SpriteEffects.None, 0f);
         _spriteBatch.End();
 
 
