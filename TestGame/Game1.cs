@@ -8,13 +8,22 @@ public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    Texture2D playerSheet;
-    Vector2 playerPosition = new Vector2(0, 0);
+    private Texture2D playerSheet;
+
+    private Vector2 playerPosition = new Vector2(0, 0);
+    private Vector2 velocity = Vector2.Zero;
+    private Vector2 acceleration = Vector2.Zero;
+
     private static int playerScale = 4;
-    public static int playerHeight = 8 * playerScale;
-    private float playerSpeed = 0.2f;
-    Rectangle sourceRect = new Rectangle(0, 0, 8, 8); 
-    bool isOnGround = false;
+    private static int spriteSize = 8;
+    private static int playerSize = spriteSize * playerScale;
+
+    private float moveSpeed = 200f;      // pixely za sekundu
+    private float gravity = 2000f;       // pixely za sekundu^2
+    private float jumpStrength = 700f;   // síla skoku
+    private bool isOnGround = false;
+
+    private Rectangle sourceRect = new Rectangle(0, 0, spriteSize, spriteSize);
 
     public Game1()
     {
@@ -25,8 +34,6 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-
         base.Initialize();
     }
 
@@ -34,66 +41,69 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         playerSheet = Content.Load<Texture2D>("spritesheet");
-
-
-        // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || 
+            Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // TODO: Add your update logic here
-        int windowHeight = GraphicsDevice.Viewport.Height;
-        int windowWidth = GraphicsDevice.Viewport.Width;
-
-        float gravity = 0.5f;
-        float playerVelocityY = 0f;
-        playerVelocityY += gravity;
-        int playerSize = playerHeight; 
-
-        if (playerPosition.X < 0)
-        {
-            playerPosition.X = 0;
-        }
-
-        if (playerPosition.X > windowWidth - playerSize)
-        {
-            playerPosition.X = windowWidth - playerSize;
-        }
-
-        if (playerPosition.Y  >= windowHeight - playerHeight )
-        {
-            playerPosition.Y = windowHeight - playerHeight; 
-            playerVelocityY = 0f; 
-            isOnGround = true;
-        }
+        float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
         KeyboardState keyState = Keyboard.GetState();
+
+        acceleration = Vector2.Zero;
+
+        // Vodorovný pohyb
         if (keyState.IsKeyDown(Keys.A))
-            playerPosition.X -= playerSpeed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;;
-        if (keyState.IsKeyDown(Keys.D))
-            playerPosition.X += playerSpeed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;;
+            velocity.X = -moveSpeed;
+        else if (keyState.IsKeyDown(Keys.D))
+            velocity.X = moveSpeed;
+        else
+            velocity.X = 0;
+
+        // Skok
         if (keyState.IsKeyDown(Keys.W) && isOnGround)
         {
-            playerVelocityY = -10f; // Rychlost skoku nahoru (zápor = nahoru)
+            velocity.Y = -jumpStrength;
             isOnGround = false;
         }
-        playerPosition.Y += playerVelocityY * gameTime.ElapsedGameTime.Milliseconds;
+
+        // Gravitace
+        acceleration.Y += gravity;
+
+        // Aplikace akcelerace
+        velocity += acceleration * elapsed;
+
+        // Aplikace rychlosti
+        playerPosition += velocity * elapsed;
+
+        // Kolize s okny
+        int windowWidth = GraphicsDevice.Viewport.Width;
+        int windowHeight = GraphicsDevice.Viewport.Height;
+
+        if (playerPosition.X < 0)
+            playerPosition.X = 0;
+        if (playerPosition.X > windowWidth - playerSize)
+            playerPosition.X = windowWidth - playerSize;
+
+        if (playerPosition.Y >= windowHeight - playerSize)
+        {
+            playerPosition.Y = windowHeight - playerSize;
+            velocity.Y = 0;
+            isOnGround = true;
+        }
+
         base.Update(gameTime);
-        
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
         _spriteBatch.Draw(playerSheet, playerPosition, sourceRect, Color.White, 0f, Vector2.Zero, playerScale, SpriteEffects.None, 0f);
         _spriteBatch.End();
-
-
-        // TODO: Add your drawing code here
 
         base.Draw(gameTime);
     }
