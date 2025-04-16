@@ -34,20 +34,32 @@ public class Game1 : Game
 
         player = new Player(new Vector2(100, 0));
 
-        // Add platform tiles
-        int tilePositionX = 100;
-        tiles.Add((new Vector2(tilePositionX, 380), SpriteSheet.PlatformTopLeft));
-        tilePositionX += 8 * 4;
-        tiles.Add((new Vector2(tilePositionX, 380), SpriteSheet.PlatformTopMid));
-        tilePositionX += 8 * 4;
-        tiles.Add((new Vector2(tilePositionX, 380), SpriteSheet.PlatformTopRight));
-        
-         tilePositionX = 200;
-        tiles.Add((new Vector2(tilePositionX, 300), SpriteSheet.PlatformTopLeft));
-        tilePositionX += 8 * 4;
-        tiles.Add((new Vector2(tilePositionX, 300), SpriteSheet.PlatformTopMid));
-        tilePositionX += 8 * 4;
-        tiles.Add((new Vector2(tilePositionX, 300), SpriteSheet.PlatformTopRight));
+        // Vytvoříme grid levelu (10x10 například)
+        int[,] levelGrid = new int[,]
+        {
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,1,2,2,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+
+        };
+
+        // Vygenerujeme level
+        LevelGenerator.GenerateLevel(levelGrid, tiles);
+
+        // Můžeš přidat i ručně nějaké platformy navíc
+      
     }
 
     protected override void Update(GameTime gameTime)

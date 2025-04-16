@@ -24,3 +24,11 @@ public static class SpriteSheet
 
     // Můžeš přidat další podle potřeby – např. pozadí, dekorace atd.
 }
+public enum TileType
+{
+    Empty = 0,
+    PlatformTopLeft = 1,
+    PlatformTopMid = 2,
+    PlatformTopRight = 3,
+    // Můžeš přidat další typy...
+}

@@ -27,93 +27,108 @@ namespace TestGame
         }
 
         public void Update(GameTime gameTime, int windowWidth, int windowHeight, List<(Vector2 position, Rectangle sourceRect)> tiles)
+{
+    float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+    // Pohyb (horizontální)
+    var keyState = Keyboard.GetState();
+    if (keyState.IsKeyDown(Keys.A))
+        Velocity.X = -MoveSpeed;
+    else if (keyState.IsKeyDown(Keys.D))
+        Velocity.X = MoveSpeed;
+    else
+        Velocity.X = 0;
+
+    // Skákání
+    if ((keyState.IsKeyDown(Keys.W) || keyState.IsKeyDown(Keys.Space)) && isOnGround)
+    {
+        Velocity.Y = -JumpStrength;
+        isOnGround = false;
+    }
+
+    // Gravitace
+    if (!isOnGround) // Pouze pokud nejsme na zemi!
+    {
+        Velocity.Y += Gravity * elapsed;
+    }
+    else
+    {
+        Velocity.Y = 0; // Zajistíme, že na zemi nebude žádná vertikální rychlost
+    }
+
+    // Navrhovaná nová pozice
+    Vector2 newPosition = Position;
+    newPosition.X += Velocity.X * elapsed;
+    newPosition.Y += Velocity.Y * elapsed;
+
+    Rectangle newBounds = new Rectangle((int)newPosition.X, (int)newPosition.Y, Size, Size);
+    bool wasOnGround = isOnGround;
+    isOnGround = false;
+
+    // Kolize s platformami
+    foreach (var tile in tiles)
+    {
+        Rectangle tileRect = new Rectangle((int)tile.position.X, (int)tile.position.Y, SpriteSize * Scale, SpriteSize * Scale);
+
+        if (newBounds.Intersects(tileRect))
         {
-            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // Vypočítáme průniky
+            float overlapLeft = newBounds.Right - tileRect.Left;
+            float overlapRight = tileRect.Right - newBounds.Left;
+            float overlapTop = newBounds.Bottom - tileRect.Top;
+            float overlapBottom = tileRect.Bottom - newBounds.Top;
 
-            // Movement (horizontal)
-            var keyState = Keyboard.GetState();
-            if (keyState.IsKeyDown(Keys.A))
-                Velocity.X = -MoveSpeed;
-            else if (keyState.IsKeyDown(Keys.D))
-                Velocity.X = MoveSpeed;
-            else
-                Velocity.X = 0;
+            // Najdeme nejmenší průnik
+            float minOverlap = Math.Min(Math.Min(overlapLeft, overlapRight), Math.Min(overlapTop, overlapBottom));
 
-            if ((keyState.IsKeyDown(Keys.W) || keyState.IsKeyDown(Keys.Space)) && isOnGround)
+            // Kolize shora (stojíme na platformě)
+            if (minOverlap == overlapTop && Velocity.Y >= 0)
             {
-                Velocity.Y = -JumpStrength;
-                isOnGround = false;
-            }
-
-            // Gravity (falling)
-            Velocity.Y += Gravity * elapsed;
-
-            // Apply vertical movement first (so it takes priority for collisions)
-            Position.Y += Velocity.Y * elapsed;
-
-            // Collision detection (only vertical movement here)
-            Rectangle playerBounds = GetBounds();
-            isOnGround = false;
-
-            // Handle vertical collisions first
-            foreach (var tile in tiles)
-            {
-                Rectangle tileRect = new Rectangle((int)tile.position.X, (int)tile.position.Y, SpriteSize * Scale, SpriteSize * Scale);
-
-                // Bottom collision (Player falling)
-                if (playerBounds.Bottom >= tileRect.Top && playerBounds.Bottom <= tileRect.Top + 10 &&
-                    playerBounds.Right > tileRect.Left && playerBounds.Left < tileRect.Right && Velocity.Y >= 0)
-                {
-                    Position.Y = tileRect.Top - Size; // Stop player on platform
-                    Velocity.Y = 0; // Stop downward velocity
-                    isOnGround = true;
-                }
-
-                // Top collision (Player jumping up)
-                if (playerBounds.Top <= tileRect.Bottom && playerBounds.Top >= tileRect.Bottom - 10 &&
-                    playerBounds.Right > tileRect.Left && playerBounds.Left < tileRect.Right && Velocity.Y <= 0)
-                {
-                    Position.Y = tileRect.Bottom; // Stop player on platform top
-                    Velocity.Y = 0;
-                }
-            }
-
-            // Apply horizontal movement after vertical movement to avoid problems
-            Position.X += Velocity.X * elapsed;
-
-            // Horizontal collision detection (correct stopping logic)
-            foreach (var tile in tiles)
-            {
-                Rectangle tileRect = new Rectangle((int)tile.position.X, (int)tile.position.Y, SpriteSize * Scale, SpriteSize * Scale);
-
-                // Left collision (Player hitting from left)
-                if (playerBounds.Right > tileRect.Left && playerBounds.Left < tileRect.Left &&
-                    playerBounds.Bottom > tileRect.Top && playerBounds.Top < tileRect.Bottom)
-                {
-                    Position.X = tileRect.Left - Size; // Stop player on the left side of the platform
-                    Velocity.X = 0;
-                }
-
-                // Right collision (Player hitting from right)
-                if (playerBounds.Left < tileRect.Right && playerBounds.Right > tileRect.Right &&
-                    playerBounds.Bottom > tileRect.Top && playerBounds.Top < tileRect.Bottom)
-                {
-                    Position.X = tileRect.Right; // Stop player on the right side of the platform
-                    Velocity.X = 0;
-                }
-            }
-
-            // Collision with window boundaries (not to go out of bounds)
-            if (Position.X < 0) Position.X = 0;
-            if (Position.X > windowWidth - Size) Position.X = windowWidth - Size;
-
-            if (Position.Y > windowHeight - Size)
-            {
-                Position.Y = windowHeight - Size;
+                newPosition.Y = tileRect.Top - Size;
+                isOnGround = true;
                 Velocity.Y = 0;
-                isOnGround = true; // When player is on the ground, they should stop falling
+                
+                // Malý posun dolů, aby se lépe "chytil" k platformě
+                if (wasOnGround && Math.Abs(Velocity.Y) < 100)
+                {
+                    newPosition.Y = tileRect.Top - Size + 1; // +1 pomáhá proti "houpání"
+                }
+            }
+            else if (minOverlap == overlapBottom && Velocity.Y <= 0)
+            {
+                // Kolize zdola (narážíme do stropu)
+                newPosition.Y = tileRect.Bottom;
+                Velocity.Y = 0;
+            }
+            else if (minOverlap == overlapLeft)
+            {
+                // Kolize zprava
+                newPosition.X = tileRect.Left - Size;
+                Velocity.X = 0;
+            }
+            else if (minOverlap == overlapRight)
+            {
+                // Kolize zleva
+                newPosition.X = tileRect.Right;
+                Velocity.X = 0;
             }
         }
+    }
+
+    // Aplikujeme novou pozici
+    Position = newPosition;
+
+    // Hranice okna
+    Position.X = MathHelper.Clamp(Position.X, 0, windowWidth - Size);
+    Position.Y = MathHelper.Clamp(Position.Y, -100, windowHeight - Size); // -100 aby mohl vypadnout nahoru
+
+    // Pokud jsme pod spodní hranicí, jsme na zemi
+    if (Position.Y >= windowHeight - Size)
+    {
+        isOnGround = true;
+        Velocity.Y = 0;
+    }
+}
 
         public void Draw(SpriteBatch spriteBatch, Texture2D texture)
         {
