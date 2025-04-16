@@ -12,8 +12,9 @@ public class Game1 : Game
     private Texture2D playerSheet;
 
     private Player player;
-   
     private List<(Vector2 position, Rectangle sourceRect)> tiles = new();
+
+    private Matrix cameraTransform; // 🆕 Přidání kamery
 
     public Game1()
     {
@@ -34,7 +35,6 @@ public class Game1 : Game
 
         player = new Player(new Vector2(100, 0));
 
-        // Vytvoříme grid levelu (10x10 například)
         int[,] levelGrid = new int[,]
         {
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -51,15 +51,10 @@ public class Game1 : Game
             {0,0,0,0,0,0,1,2,2,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,3,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-
+            {0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0},
         };
 
-        // Vygenerujeme level
         LevelGenerator.GenerateLevel(levelGrid, tiles);
-
-        // Můžeš přidat i ručně nějaké platformy navíc
-      
     }
 
     protected override void Update(GameTime gameTime)
@@ -72,6 +67,9 @@ public class Game1 : Game
 
         player.Update(gameTime, windowWidth, windowHeight, tiles);
 
+        // 🆕 Aktualizace kamery
+        UpdateCamera();
+
         base.Update(gameTime);
     }
 
@@ -79,11 +77,11 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        // 🆕 Použití kamery při vykreslování
+        _spriteBatch.Begin(transformMatrix: cameraTransform, samplerState: SamplerState.PointClamp);
 
         player.Draw(_spriteBatch, playerSheet);
 
-        // Draw the platforms (tiles)
         foreach (var tile in tiles)
         {
             _spriteBatch.Draw(playerSheet, tile.position, tile.sourceRect, Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0f);
@@ -92,5 +90,16 @@ public class Game1 : Game
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+
+    // 🆕 Funkce na výpočet transformace kamery
+    private void UpdateCamera()
+    {
+        // Předpoklad: velikost hráče je konstantní
+        Vector2 playerCenter = player.Position + new Vector2(Player.Size / 2);
+        Vector2 screenCenter = new Vector2(GraphicsDevice.Viewport.Width / 2f, GraphicsDevice.Viewport.Height / 2f);
+
+        cameraTransform = Matrix.CreateTranslation(-playerCenter.X, -playerCenter.Y, 0f) *
+                          Matrix.CreateTranslation(screenCenter.X, screenCenter.Y, 0f);
     }
 }
