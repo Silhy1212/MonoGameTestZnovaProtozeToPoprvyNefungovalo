@@ -12,6 +12,7 @@ public class Game1 : Game
     Vector2 playerPosition = new Vector2(0, 0);
     private static int playerScale = 4;
     public static int playerHeight = 8 * playerScale;
+    private float playerSpeed = 0.2f;
     Rectangle sourceRect = new Rectangle(0, 0, 8, 8); 
 
     public Game1()
@@ -50,6 +51,11 @@ public class Game1 : Game
             playerPosition.Y = windowHeight - playerHeight; // Zastavíme hráče na spodní hranici okna
             velocity = 0f; // Zastavíme vertikální pohyb (gravitace)
         }
+        KeyboardState keyState = Keyboard.GetState();
+        if (keyState.IsKeyDown(Keys.A))
+            playerPosition.X -= playerSpeed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;;
+        if (keyState.IsKeyDown(Keys.D))
+            playerPosition.X += playerSpeed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;;
         playerPosition.Y += velocity * gameTime.ElapsedGameTime.Milliseconds;
         base.Update(gameTime);
         
