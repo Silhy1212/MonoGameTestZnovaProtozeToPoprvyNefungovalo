@@ -41,7 +41,8 @@ public class Game1 : Game
             Exit();
 
         // TODO: Add your update logic here
-
+        float velocity = 0.5f;
+        playerPosition.Y += velocity * gameTime.ElapsedGameTime.Milliseconds;
         base.Update(gameTime);
         
     }

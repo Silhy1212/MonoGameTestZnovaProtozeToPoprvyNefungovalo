@@ -25,3 +25,4 @@ C:\Users\matej.silhan\Desktop\MonoGameTestZnovaProtozeToPoprvyNefungovalo\TestGa
 C:\Users\matej.silhan\Desktop\MonoGameTestZnovaProtozeToPoprvyNefungovalo\TestGame\obj\Debug\net8.0-windows\TestGame.genruntimeconfig.cache
 C:\Users\matej.silhan\Desktop\MonoGameTestZnovaProtozeToPoprvyNefungovalo\TestGame\obj\Debug\net8.0-windows\ref\TestGame.dll
 C:\Users\matej.silhan\Desktop\MonoGameTestZnovaProtozeToPoprvyNefungovalo\TestGame\bin\Debug\net8.0-windows\Content\spritesheet.xnb
+C:\Users\matej.silhan\Desktop\MonoGameTestZnovaProtozeToPoprvyNefungovalo\TestGame\obj\Debug\net8.0-windows\TestGame.sourcelink.json
