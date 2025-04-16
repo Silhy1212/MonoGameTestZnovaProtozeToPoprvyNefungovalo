@@ -14,6 +14,7 @@ public class Game1 : Game
     public static int playerHeight = 8 * playerScale;
     private float playerSpeed = 0.2f;
     Rectangle sourceRect = new Rectangle(0, 0, 8, 8); 
+    bool isOnGround = false;
 
     public Game1()
     {
@@ -45,18 +46,40 @@ public class Game1 : Game
 
         // TODO: Add your update logic here
         int windowHeight = GraphicsDevice.Viewport.Height;
-        float velocity = 0.5f;
+        int windowWidth = GraphicsDevice.Viewport.Width;
+
+        float gravity = 0.5f;
+        float playerVelocityY = 0f;
+        playerVelocityY += gravity;
+        int playerSize = playerHeight; 
+
+        if (playerPosition.X < 0)
+        {
+            playerPosition.X = 0;
+        }
+
+        if (playerPosition.X > windowWidth - playerSize)
+        {
+            playerPosition.X = windowWidth - playerSize;
+        }
+
         if (playerPosition.Y  >= windowHeight - playerHeight )
         {
-            playerPosition.Y = windowHeight - playerHeight; // Zastavíme hráče na spodní hranici okna
-            velocity = 0f; // Zastavíme vertikální pohyb (gravitace)
+            playerPosition.Y = windowHeight - playerHeight; 
+            playerVelocityY = 0f; 
+            isOnGround = true;
         }
         KeyboardState keyState = Keyboard.GetState();
         if (keyState.IsKeyDown(Keys.A))
             playerPosition.X -= playerSpeed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;;
         if (keyState.IsKeyDown(Keys.D))
             playerPosition.X += playerSpeed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;;
-        playerPosition.Y += velocity * gameTime.ElapsedGameTime.Milliseconds;
+        if (keyState.IsKeyDown(Keys.W) && isOnGround)
+        {
+            playerVelocityY = -10f; // Rychlost skoku nahoru (zápor = nahoru)
+            isOnGround = false;
+        }
+        playerPosition.Y += playerVelocityY * gameTime.ElapsedGameTime.Milliseconds;
         base.Update(gameTime);
         
     }
