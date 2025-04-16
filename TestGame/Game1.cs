@@ -1,6 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
 
 namespace TestGame;
 
@@ -12,16 +15,18 @@ public class Game1 : Game
 
     private Vector2 playerPosition = new Vector2(0, 0);
     private Vector2 velocity = Vector2.Zero;
-    private Vector2 acceleration = Vector2.Zero;
 
     private static int playerScale = 4;
     private static int spriteSize = 8;
     private static int playerSize = spriteSize * playerScale;
 
-    private float moveSpeed = 200f;      // pixely za sekundu
-    private float gravity = 2000f;       // pixely za sekundu^2
-    private float jumpStrength = 700f;   // síla skoku
+    private float moveSpeed = 200f;      
+    private float gravity = 2000f;      
+    private float jumpStrength = 700f;   
     private bool isOnGround = false;
+    
+    List<Platform> platforms = new List<Platform>();
+
 
     private Rectangle sourceRect = new Rectangle(0, 0, spriteSize, spriteSize);
 
@@ -41,6 +46,10 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         playerSheet = Content.Load<Texture2D>("spritesheet");
+        platforms.Add(new Platform(new Vector2(100, 300)));
+        platforms.Add(new Platform(new Vector2(124, 300)));
+        platforms.Add(new Platform(new Vector2(148, 300)));
+
     }
 
     protected override void Update(GameTime gameTime)
@@ -52,9 +61,8 @@ public class Game1 : Game
         float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
         KeyboardState keyState = Keyboard.GetState();
 
-        acceleration = Vector2.Zero;
+        velocity.Y += gravity * elapsed; 
 
-        // Vodorovný pohyb
         if (keyState.IsKeyDown(Keys.A))
             velocity.X = -moveSpeed;
         else if (keyState.IsKeyDown(Keys.D))
@@ -62,23 +70,14 @@ public class Game1 : Game
         else
             velocity.X = 0;
 
-        // Skok
-        if (keyState.IsKeyDown(Keys.W) && isOnGround)
+        if ((keyState.IsKeyDown(Keys.W) || keyState.IsKeyDown(Keys.Space)) && isOnGround)
         {
             velocity.Y = -jumpStrength;
             isOnGround = false;
         }
 
-        // Gravitace
-        acceleration.Y += gravity;
-
-        // Aplikace akcelerace
-        velocity += acceleration * elapsed;
-
-        // Aplikace rychlosti
         playerPosition += velocity * elapsed;
 
-        // Kolize s okny
         int windowWidth = GraphicsDevice.Viewport.Width;
         int windowHeight = GraphicsDevice.Viewport.Height;
 
@@ -90,9 +89,12 @@ public class Game1 : Game
         if (playerPosition.Y >= windowHeight - playerSize)
         {
             playerPosition.Y = windowHeight - playerSize;
-            velocity.Y = 0;
+            velocity.Y = 0; 
             isOnGround = true;
         }
+
+      
+        Console.WriteLine("Pádová rychlost (velocity.Y): " + velocity.Y);
 
         base.Update(gameTime);
     }
@@ -103,6 +105,11 @@ public class Game1 : Game
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
         _spriteBatch.Draw(playerSheet, playerPosition, sourceRect, Color.White, 0f, Vector2.Zero, playerScale, SpriteEffects.None, 0f);
+        foreach (var platform in platforms)
+        {
+            platform.Draw(_spriteBatch, playerSheet);
+        }
+
         _spriteBatch.End();
 
         base.Draw(gameTime);
