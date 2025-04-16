@@ -30,5 +30,11 @@ public enum TileType
     PlatformTopLeft = 1,
     PlatformTopMid = 2,
     PlatformTopRight = 3,
+    PlatformMidLeft = 4,
+    PlatformMidMid = 5,
+    PlatformMidRight = 6,
+    PlatformBottomLeft = 7,
+    PlatformBottomMid = 8,
+    PlatformBottomRight = 9,
     // Můžeš přidat další typy...
 }

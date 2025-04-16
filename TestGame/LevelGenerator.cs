@@ -29,6 +29,25 @@ namespace TestGame
                         case TileType.PlatformTopRight:
                             tiles.Add((position, SpriteSheet.PlatformTopRight));
                             break;
+                        case TileType.PlatformMidLeft:
+                            tiles.Add((position, SpriteSheet.PlatformMidLeft));
+                            break;
+                        case TileType.PlatformMidMid:
+                            tiles.Add((position, SpriteSheet.PlatformMidMid));
+                            break;
+                        case TileType.PlatformMidRight:
+                            tiles.Add((position, SpriteSheet.PlatformMidRight));
+                            break;
+                        case TileType.PlatformBottomLeft:
+                            tiles.Add((position, SpriteSheet.PlatformBottomLeft));
+                            break;
+                        case TileType.PlatformBottomMid:
+                            tiles.Add((position, SpriteSheet.PlatformBottomMid));
+                            break;
+                        case TileType.PlatformBottomRight:
+                            tiles.Add((position, SpriteSheet.PlatformBottomRight));
+                            break;
+                        
                         // Přidej další případy podle potřeby
                     }
                 }
